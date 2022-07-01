@@ -1,41 +1,79 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { Todo } from './entities/todo.entity';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 @Injectable()
 export class TodosService {
-  private readonly todos: Todo[] = [];
-
-  create(createTodoDto: CreateTodoDto) {
-    this.todos.push(createTodoDto);
+  async create(createTodoDto: CreateTodoDto) {
+    const todo = await prisma.todo.create({
+      data: {
+        title: createTodoDto.title,
+        completed: createTodoDto.completed,
+      },
+    });
+    return todo;
   }
 
-  findAll() {
-    if (this.todos.length === 0) {
-      throw new HttpException('No todos found', HttpStatus.NOT_FOUND);
-    }
-    return this.todos;
+  async findAll() {
+    const todos = await prisma.todo.findMany();
+    return todos;
   }
 
-  findOne(id: number) {
-    const todo = this.todos.find((todo) => todo.id === id);
+  async findOne(id: number) {
+    const todo = await prisma.todo.findUnique({
+      where: {
+        id,
+      },
+    });
     if (!todo) {
       throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
     }
     return todo;
   }
 
-  update(id: number, updateTodoDto: UpdateTodoDto) {
-    const todo = this.findOne(id);
-    todo.title = updateTodoDto.title;
-    todo.completed = updateTodoDto.completed;
+  async update(id: number, updateTodoDto: UpdateTodoDto) {
+    const todo = await prisma.todo.update({
+      where: {
+        id,
+      },
+      data: {
+        title: updateTodoDto.title,
+        completed: updateTodoDto.completed,
+      },
+    });
+    if (!todo) {
+      throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+    }
     return todo;
   }
 
-  remove(id: number) {
-    const todo = this.findOne(id);
-    this.todos.splice(this.todos.indexOf(todo), 1);
+  async complete(id: number) {
+    const todo = await prisma.todo.update({
+      where: {
+        id,
+      },
+      data: {
+        completed: true,
+      },
+    });
+    if (!todo) {
+      throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+    }
+    return todo;
+  }
+
+  async remove(id: number) {
+    const todo = await prisma.todo.delete({
+      where: {
+        id,
+      },
+    });
+    if (!todo) {
+      throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+    }
     return todo;
   }
 }
