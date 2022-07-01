@@ -1,14 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { PrismaService } from 'src/prisma-service/prisma-service.service';
 
 @Injectable()
 export class TodosService {
+  constructor(private readonly prisma: PrismaService) {}
+
   async create(createTodoDto: CreateTodoDto) {
-    const todo = await prisma.todo.create({
+    const todo = await this.prisma.todo.create({
       data: {
         title: createTodoDto.title,
         completed: createTodoDto.completed,
@@ -18,12 +18,12 @@ export class TodosService {
   }
 
   async findAll() {
-    const todos = await prisma.todo.findMany();
+    const todos = await this.prisma.todo.findMany();
     return todos;
   }
 
   async findOne(id: number) {
-    const todo = await prisma.todo.findUnique({
+    const todo = await this.prisma.todo.findUnique({
       where: {
         id,
       },
@@ -35,7 +35,7 @@ export class TodosService {
   }
 
   async update(id: number, updateTodoDto: UpdateTodoDto) {
-    const todo = await prisma.todo.update({
+    const todo = await this.prisma.todo.update({
       where: {
         id,
       },
@@ -51,7 +51,7 @@ export class TodosService {
   }
 
   async complete(id: number) {
-    const todo = await prisma.todo.update({
+    const todo = await this.prisma.todo.update({
       where: {
         id,
       },
@@ -66,7 +66,7 @@ export class TodosService {
   }
 
   async remove(id: number) {
-    const todo = await prisma.todo.delete({
+    const todo = await this.prisma.todo.delete({
       where: {
         id,
       },
