@@ -8,18 +8,16 @@ export class TodosService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createTodoDto: CreateTodoDto) {
-    const todo = await this.prisma.todo.create({
+    return await this.prisma.todo.create({
       data: {
         title: createTodoDto.title,
         completed: createTodoDto.completed,
       },
     });
-    return todo;
   }
 
   async findAll() {
-    const todos = await this.prisma.todo.findMany();
-    return todos;
+    return await this.prisma.todo.findMany();
   }
 
   async findOne(id: number) {

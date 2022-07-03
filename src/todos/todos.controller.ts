@@ -1,52 +1,59 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('todos')
 export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createTodoDto: CreateTodoDto) {
-    const todo = await this.todosService.create(createTodoDto);
-    return todo;
+    return await this.todosService.create(createTodoDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
-    return this.todosService.findAll();
+    return await this.todosService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.todosService.findOne(id);
+    return await this.todosService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTodoDto: UpdateTodoDto,
   ) {
-    return this.todosService.update(+id, updateTodoDto);
+    return await this.todosService.update(+id, updateTodoDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/complete')
   async complete(@Param('id', ParseIntPipe) id: number) {
-    return this.todosService.complete(+id);
+    return await this.todosService.complete(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.todosService.remove(+id);
+    return await this.todosService.remove(+id);
   }
 }
